@@ -1,0 +1,14 @@
+{
+    "profiles": {
+        "MedTech": {
+            "commandName": "Project",
+            "launchBrowser": true,
+            "environmentVariables": {
+                "TestAuthEnvironment:FilePath": "..//..//testauthenvironment.json",
+                "DataStore": "MedTechFunctionServer",
+                "ASPNETCORE_ENVIRONMENT": "development"
+            },
+            "applicationUrl": "https://localhost:44348/"
+        }
+    }
+}
