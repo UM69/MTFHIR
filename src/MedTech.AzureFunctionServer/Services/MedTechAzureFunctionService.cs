@@ -27,7 +27,12 @@ namespace Microsoft.Extensions.DependencyInjection
         public async Task<ResourceWrapper> GetClassificationsByPatientId(string patientId, string resourceType)
         {
             var medTechAzureFunctionUrl = string.Format(_configuration.Host + _configuration.AzureFunctionPath, patientId);
-            HttpResponseMessage httpResponse = await _client.GetAsync(new Uri(medTechAzureFunctionUrl)).ConfigureAwait(true);
+            var req = new HttpRequestMessage(HttpMethod.Get, medTechAzureFunctionUrl)
+            {
+                Version = new Version(2, 0),
+            };
+            HttpResponseMessage httpResponse = await _client.SendAsync(req).ConfigureAwait(true);
+
             if (!httpResponse.IsSuccessStatusCode)
             {
                 return await Task.FromResult(new ResourceWrapper(
