@@ -16,6 +16,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public class MedTechAzureFunctionService : IMedTechAzureFunctionService
     {
         private readonly MedTechDataStoreConfiguration _configuration;
+        private static readonly HttpClient _client = new HttpClient();
 
         public MedTechAzureFunctionService(MedTechDataStoreConfiguration configuration)
         {
@@ -25,25 +26,21 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public async Task<ResourceWrapper> GetClassificationsByPatientId(string patientId, string resourceType)
         {
-            HttpResponseMessage httpResponse = null;
             var medTechAzureFunctionUrl = string.Format(_configuration.Host + _configuration.AzureFunctionPath, patientId);
-            using (var client = new HttpClient())
+            HttpResponseMessage httpResponse = await _client.GetAsync(new Uri(medTechAzureFunctionUrl)).ConfigureAwait(true);
+            if (!httpResponse.IsSuccessStatusCode)
             {
-                httpResponse = await client.GetAsync(new Uri(medTechAzureFunctionUrl)).ConfigureAwait(true);
-                if (!httpResponse.IsSuccessStatusCode)
-                {
-                    return await Task.FromResult(new ResourceWrapper(
-                        patientId,
-                        "1",
-                        resourceType,
-                        new RawResource(null, FhirResourceFormat.Json, false),
-                        new ResourceRequest("POST"),
-                        new DateTimeOffset(DateTime.Now),
-                        false,
-                        null,
-                        null,
-                        null)).ConfigureAwait(true);
-                }
+                return await Task.FromResult(new ResourceWrapper(
+                    patientId,
+                    "1",
+                    resourceType,
+                    new RawResource(null, FhirResourceFormat.Json, false),
+                    new ResourceRequest("POST"),
+                    new DateTimeOffset(DateTime.Now),
+                    false,
+                    null,
+                    null,
+                    null)).ConfigureAwait(true);
             }
 
             var condition = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(true);
